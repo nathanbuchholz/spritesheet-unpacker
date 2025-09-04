@@ -1,0 +1,209 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:services="clr-namespace:SpritesheetUnpacker.Services"
+    x:Class="SpritesheetUnpacker.MainWindow"
+    Width="1280" Height="720"
+    Title="Spritesheet Unpacker"
+    Icon="avares://SpritesheetUnpacker/Assets/multi-image-fill.ico">
+
+    <Window.Resources>
+        <ControlTheme x:Key="SliceToggleTheme" TargetType="ToggleButton">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </ControlTheme>
+    </Window.Resources>
+
+    <Window.Styles>
+        <Style Selector="ItemsControl#SliceItems ToggleButton.slice">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="#E6FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style Selector="ItemsControl#SliceItems ToggleButton.slice:pointerover">
+            <Setter Property="Background" Value="#40FFC24A"/>
+            <Setter Property="BorderBrush" Value="#FFFFFFFF"/>
+        </Style>
+
+        <Style Selector="ItemsControl#SliceItems ToggleButton.slice:checked">
+            <Setter Property="Background" Value="#66FFC24A"/>
+            <Setter Property="BorderBrush" Value="#FFFFFFFF"/>
+        </Style>
+
+        <Style Selector="ItemsControl#SliceItems ToggleButton.slice:checked:pointerover">
+            <Setter Property="Background" Value="#80FFC24A"/>
+            <Setter Property="BorderBrush" Value="#FFFFFFFF"/>
+        </Style>
+
+        <Style Selector="ItemsControl#SliceItems ToggleButton.slice:pressed">
+            <Setter Property="Background" Value="#99FFC24A"/>
+            <Setter Property="BorderBrush" Value="#FFFFFFFF"/>
+        </Style>
+    </Window.Styles>
+
+
+    <Grid RowDefinitions="Auto,*,Auto" Margin="12">
+
+        <!-- Toolbar -->
+        <Grid Grid.Row="0"
+              ColumnDefinitions="Auto,1,2*,1,1*,1,1*"
+              RowDefinitions="Auto,Auto"
+              VerticalAlignment="Center">
+
+          <!-- Open / Clear -->
+          <StackPanel Grid.Column="0" Grid.RowSpan="2" Orientation="Vertical" Spacing="4">
+            <Button x:Name="OpenBtn"  Content="Open File"/>
+            <Button x:Name="ClearBtn" Content="Clear" IsEnabled="False"/>
+          </StackPanel>
+
+          <Border Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Width="1" Background="#444" Margin="24,0"/>
+
+          <!-- Slice Mode -->
+          <Grid Grid.Column="2" Grid.Row="0" Grid.RowSpan="2"
+                RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,8,Auto,12,Auto,8,Auto,12,Auto,12,Auto">
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Slice Mode:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+            <RadioButton x:Name="AutoModeRb" Grid.Row="0" Grid.Column="2"
+                         Content="Auto" GroupName="SliceMode" IsChecked="True"/>
+            <RadioButton x:Name="GridModeRb" Grid.Row="0" Grid.Column="4"
+                         Content="Grid" GroupName="SliceMode"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Cell Width:" VerticalAlignment="Center"/>
+            <TextBox   x:Name="CellWBox" Grid.Row="1" Grid.Column="2" Width="60"
+                       IsEnabled="{CompiledBinding #GridModeRb.IsChecked}"
+                       HorizontalAlignment="Left" Watermark="px"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="4" Text="Cell Height:" VerticalAlignment="Center"/>
+            <TextBox   x:Name="CellHBox" Grid.Row="1" Grid.Column="6" Width="60"
+                       IsEnabled="{CompiledBinding #GridModeRb.IsChecked}"
+                       HorizontalAlignment="Left" Watermark="px"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="8"  Text="Margin:" VerticalAlignment="Center"/>
+              <TextBox x:Name="MarginBox" Grid.Row="1" Grid.Column="10" Width="60"
+                       IsEnabled="{CompiledBinding #GridModeRb.IsChecked}"
+                       HorizontalAlignment="Left" Text="0" Watermark="px"/>
+          </Grid>
+
+          <Border Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Width="1" Background="#444" Margin="8,0"/>
+
+          <Button Grid.Column="4" Grid.Row="0" Grid.RowSpan="2" x:Name="SliceBtn" Content="Slice" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+          <Border Grid.Column="5" Grid.Row="0" Grid.RowSpan="2" Width="1" Background="#444" Margin="8,0"/>
+
+          <Button Grid.Column="6" Grid.Row="0" Grid.RowSpan="2" x:Name="ExportBtn" Content="Export"
+                  IsEnabled="False" VerticalAlignment="Center"  HorizontalAlignment="Center"/>
+        </Grid>
+
+        <!-- Content -->
+        <Grid Grid.Row="1">
+          <Border x:Name="DropZone"
+                  DragDrop.AllowDrop="True"
+                  Margin="0 8"
+                  Background="#111111"
+                  BorderBrush="#666666"
+                  BorderThickness="2"
+                  CornerRadius="8"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+              <TextBlock Text="Drop an image here" FontSize="20" HorizontalAlignment="Center"/>
+              <TextBlock Text="or click to browse" Opacity="0.8" HorizontalAlignment="Center"/>
+            </StackPanel>
+          </Border>
+
+          <Border x:Name="PreviewContainer"
+                  Margin="8"
+                  BorderBrush="#444" BorderThickness="1"
+                  CornerRadius="4"
+                  IsVisible="False">
+            <Grid>
+              <Image x:Name="PreviewImage" Stretch="Uniform" IsHitTestVisible="False"/>
+
+              <ItemsControl x:Name="SliceItems"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch">
+                  <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                          <Canvas/>
+                      </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+
+                  <ItemsControl.ItemContainerTheme>
+                      <ControlTheme TargetType="ContentPresenter">
+                          <Setter Property="Canvas.Left"  Value="{CompiledBinding Left,   DataType=services:SliceItemVM}"/>
+                          <Setter Property="Canvas.Top"   Value="{CompiledBinding Top,    DataType=services:SliceItemVM}"/>
+                          <Setter Property="Width"        Value="{CompiledBinding Width,  DataType=services:SliceItemVM}"/>
+                          <Setter Property="Height"       Value="{CompiledBinding Height, DataType=services:SliceItemVM}"/>
+                      </ControlTheme>
+                  </ItemsControl.ItemContainerTheme>
+
+                  <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="services:SliceItemVM">
+                          <ToggleButton Classes="slice"
+                                        Theme="{StaticResource SliceToggleTheme}"
+                                        IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                        Padding="0" MinWidth="0" MinHeight="0"
+                                        HorizontalContentAlignment="Stretch"
+                                        VerticalContentAlignment="Stretch">
+                              <Grid ClipToBounds="True">
+                                  <Viewbox Stretch="Uniform"
+                                           StretchDirection="DownOnly"
+                                           IsVisible="{Binding IsSelected}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Margin="1">
+                                      <TextBlock Text="✅" FontSize="12"/>
+                                  </Viewbox>
+                              </Grid>
+                          </ToggleButton>
+                      </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Grid>
+          </Border>
+        </Grid>
+
+        <!-- Bottom Info Bar -->
+        <Grid Grid.Row="2" RowDefinitions="Auto,Auto" RowSpacing="8">
+            <Border Background="#202020" Padding="8,6" CornerRadius="6" Grid.Column="0">
+                <SelectableTextBlock x:Name="CurrentFileTxt"
+                                     Text="Load a file..."
+                                     Foreground="White"
+                                     TextTrimming="CharacterEllipsis"/>
+            </Border>
+
+            <Border Background="#202020" Padding="8,6" CornerRadius="6" Grid.Row="1">
+                <ScrollViewer x:Name="LogScroll" Height="100" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl x:Name="LogList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="services:LogEntry">
+                                <Grid ColumnDefinitions="Auto,8,*"
+                                      TextElement.FontFamily="Cascadia Mono, Consolas, 'Courier New', monospace"
+                                      TextElement.FontSize="12">
+                                    <SelectableTextBlock Grid.Column="0"
+                                                         Text="{Binding TimestampLocal, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}"
+                                                         Foreground="#9aa3ad"/>
+                                    <SelectableTextBlock Grid.Column="2"
+                                                         Text="{Binding Message}"
+                                                         Foreground="{Binding Brush}"
+                                                         TextWrapping="Wrap"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

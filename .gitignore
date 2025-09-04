@@ -1,0 +1,56 @@
+﻿## OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+## Build output
+bin/
+obj/
+out/
+artifacts/
+publish/
+[Bb]uild/
+[Bb]in/
+[Oo]bj/
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+_.sln.DotSettings.user
+_ReSharper.Caches/
+
+## Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Test + coverage
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+coverage*/
+coverage.*
+*.lcov
+BenchmarkDotNet.Artifacts/
+
+## Logs & temp
+*.log
+logs/
+*.pid
+*.tmp
+*.temp
+~$*
+
+## NuGet / tooling
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# Keep dotnet local tools manifest
+!.config/
+!.config/dotnet-tools.json
